@@ -92,7 +92,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20 # Use Node 20 to better support ESM require/import if needed
+          node-version: 18
 
       - name: Install DepGuard Tool Dependencies
         run: |
@@ -101,8 +101,12 @@ jobs:
 
       - name: Install Project Dependencies to Scan
         run: |
-          # Install dependencies at the root so scan.js can find them
-          npm install
+          # Verify package.json exists and has a dependencies field before running npm install
+          if [ -f package.json ] && grep -q '"dependencies":' package.json; then
+            npm install
+          else
+            echo "No root dependencies to install."
+          fi
 
       - name: Run Full Tree Scan
         id: scan
