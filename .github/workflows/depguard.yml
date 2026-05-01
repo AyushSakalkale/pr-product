@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - 'package.json'
+      - 'depguard/package.json'
       - 'requirements.txt'
       - 'Gemfile'
       - 'go.mod'
