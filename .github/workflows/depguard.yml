@@ -70,13 +70,14 @@ jobs:
             # Run depguard and capture output
             OUTPUT=$(node $DEP_GUARD_PATH $pkg)
             
-            # Extract score and summary
+            # Extract scores and summary
             SCORE=$(echo "$OUTPUT" | grep "Final Score:" | awk '{print $3}')
+            MAINTENANCE=$(echo "$OUTPUT" | grep "Maintenance Score:" | awk '{print $3}')
             SUMMARY=$(echo "$OUTPUT" | sed -n '/----------------------------/,$p' | tail -n +3)
             
             COMMENT_BODY="$COMMENT_BODY**Package:** \`$pkg\`  \n"
-            COMMENT_BODY="$COMMENT_BODY**Score:** $SCORE / 100  \n"
-            COMMENT_BODY="$COMMENT_BODY$SUMMARY\n\n---\n"
+            COMMENT_BODY="$COMMENT_BODY**Score:** $SCORE / 100 | **Maintenance:** $MAINTENANCE / 100 \n"
+            COMMENT_BODY="$COMMENT_BODY<details><summary>Detailed Analysis</summary>\n\n$SUMMARY\n\n</details>\n\n---\n"
             
             if [ "$SCORE" -lt 50 ]; then
               FAILED=true
