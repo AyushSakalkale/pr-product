@@ -37,8 +37,10 @@ jobs:
         run: |
           git fetch origin main:main
           CHANGED_PACKAGES=""
-          if git diff main...HEAD package.json | grep -q '^+'; then
-            NPM_CHANGES=$(git diff main...HEAD package.json | grep '^+ ' | grep '"' | cut -d'"' -f2 | sort -u | xargs)
+          if git diff main...HEAD package.json | grep -q '^\+ '; then
+            # Extract added lines, remove plus sign, join into one line, and wrap in a JSON object
+            DIFF_CONTENT=$(git diff main...HEAD package.json | grep '^\+ ' | sed 's/^\+//' | tr -d '\n' | sed 's/,$//')
+            NPM_CHANGES=$(echo "{ \"dependencies\": { $DIFF_CONTENT } }" | jq -r '.dependencies // {} | keys[]' | xargs)
             CHANGED_PACKAGES="$CHANGED_PACKAGES $NPM_CHANGES"
           fi
           if git diff main...HEAD requirements.txt | grep -q '^+'; then
