@@ -1,0 +1,238 @@
+const fs = require('fs');
+const path = require('path');
+
+/**
+ * Walks the node_modules folder recursively up to a specified depth.
+ * Deduplicates by package name, keeping the shallowest occurrence.
+ * 
+ * @param {string} projectPath - Path to the project root.
+ * @param {number} maxDepth - Maximum depth to walk.
+ * @returns {Promise<Array>} - Flat array of unique dependency objects.
+ */
+async function getDependencyTree(projectPath, maxDepth = 3) {
+    const uniquePackages = new Map();
+    const rootPackageJsonPath = path.join(projectPath, 'package.json');
+
+    try {
+        // 1. Identify direct dependencies (Depth 0 candidates)
+        const rootContent = JSON.parse(fs.readFileSync(rootPackageJsonPath, 'utf8'));
+        const directDeps = new Set([
+            ...Object.keys(rootContent.dependencies || {}),
+            ...Object.keys(rootContent.devDependencies || {})
+        ]);
+
+        // Pre-build a map of who depends on what at the top level
+        // mapping subDepName -> directDepName
+        const transitiveParentMap = new Map();
+        for (const directDep of directDeps) {
+            try {
+                const directDepPkgJson = path.join(projectPath, 'node_modules', directDep, 'package.json');
+                if (fs.existsSync(directDepPkgJson)) {
+                    const content = JSON.parse(fs.readFileSync(directDepPkgJson, 'utf8'));
+                    const subDeps = Object.keys(content.dependencies || {});
+                    for (const subDep of subDeps) {
+                        if (!transitiveParentMap.has(subDep)) {
+                            transitiveParentMap.set(subDep, directDep);
+                        }
+                    }
+                }
+            } catch (e) { /* skip */ }
+        }
+
+        // Load package-lock.json if available
+        let packageLock = null;
+        try {
+            const lockPath = path.join(projectPath, 'package-lock.json');
+            if (fs.existsSync(lockPath)) {
+                packageLock = JSON.parse(fs.readFileSync(lockPath, 'utf8'));
+            }
+        } catch (e) { /* skip */ }
+
+        const sortedDirectDeps = Array.from(directDeps).sort();
+        const defaultParent = sortedDirectDeps[0] ? `${sortedDirectDeps[0]} (inherited)` : null;
+
+        /**
+         * Recursive walker
+         */
+        async function walk(currentPath, currentDepth, parentName) {
+            if (currentDepth > maxDepth) return;
+
+            const nodeModulesPath = path.join(currentPath, 'node_modules');
+            if (!fs.existsSync(nodeModulesPath)) return;
+
+            const entries = fs.readdirSync(nodeModulesPath, { withFileTypes: true });
+
+            for (const entry of entries) {
+                if (entry.isDirectory()) {
+                    let pkgNames = [entry.name];
+                    let pkgPaths = [path.join(nodeModulesPath, entry.name)];
+
+                    // Handle scoped packages
+                    if (entry.name.startsWith('@')) {
+                        const scopedEntries = fs.readdirSync(pkgPaths[0], { withFileTypes: true });
+                        pkgNames = [];
+                        pkgPaths = [];
+                        for (const se of scopedEntries) {
+                            if (se.isDirectory()) {
+                                pkgNames.push(`${entry.name}/${se.name}`);
+                                pkgPaths.push(path.join(nodeModulesPath, entry.name, se.name));
+                            }
+                        }
+                    }
+
+                    for (let i = 0; i < pkgNames.length; i++) {
+                        const name = pkgNames[i];
+                        const fullPath = pkgPaths[i];
+                        const pkgJsonPath = path.join(fullPath, 'package.json');
+
+                        if (fs.existsSync(pkgJsonPath)) {
+                            try {
+                                const content = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
+                                const version = content.version;
+                                
+                                // Determine depth: 0 if in root package.json AND at root node_modules
+                                let depth = currentDepth;
+                                if (currentDepth === 0 && !directDeps.has(name)) {
+                                    depth = 1; // Flattened transitive dependency
+                                }
+
+                                // Resolve parent name for flattened transitive deps
+                                let resolvedParent = parentName;
+                                if (depth === 1 && !resolvedParent) {
+                                    resolvedParent = transitiveParentMap.get(name) || null;
+                                    
+                                    // Fallback 1: Check nested node_modules and package.json of direct dependencies
+                                    if (!resolvedParent) {
+                                        for (const directDep of directDeps) {
+                                            const depPath = path.join(projectPath, 'node_modules', directDep);
+                                            
+                                            if (fs.existsSync(path.join(depPath, 'node_modules', name))) {
+                                                resolvedParent = directDep;
+                                                break;
+                                            }
+                                            
+                                            const pkgJsonPath = path.join(depPath, 'package.json');
+                                            if (fs.existsSync(pkgJsonPath)) {
+                                                try {
+                                                    const content = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
+                                                    const deps = { ...(content.dependencies || {}), ...(content.devDependencies || {}) };
+                                                    if (deps[name]) {
+                                                        resolvedParent = directDep;
+                                                        break;
+                                                    }
+                                                } catch (e) {}
+                                            }
+                                        }
+                                    }
+
+                                    // Fallback 2: Recursive Lockfile Trace
+                                    if (!resolvedParent && packageLock) {
+                                        if (packageLock.packages) {
+                                            const lockPackages = packageLock.packages;
+                                            
+                                            function findInPackagesTree(currentPath, target, visited = new Set()) {
+                                                if (visited.has(currentPath)) return false;
+                                                visited.add(currentPath);
+                                                
+                                                const pkgData = lockPackages[currentPath];
+                                                if (!pkgData) return false;
+                                                
+                                                const deps = { ...(pkgData.dependencies || {}), ...(pkgData.devDependencies || {}) };
+                                                if (deps[target]) return true;
+                                                
+                                                for (const depName of Object.keys(deps)) {
+                                                    let nextPath = `${currentPath}/node_modules/${depName}`;
+                                                    if (!lockPackages[nextPath]) {
+                                                        nextPath = `node_modules/${depName}`;
+                                                    }
+                                                    if (findInPackagesTree(nextPath, target, visited)) {
+                                                        return true;
+                                                    }
+                                                }
+                                                return false;
+                                            }
+
+                                            for (const directDep of directDeps) {
+                                                if (findInPackagesTree(`node_modules/${directDep}`, name)) {
+                                                    resolvedParent = directDep;
+                                                    break;
+                                                }
+                                            }
+                                        } else if (packageLock.dependencies) {
+                                            const lockDeps = packageLock.dependencies;
+                                            
+                                            function findInDependenciesTree(depNode, target) {
+                                                if (!depNode) return false;
+                                                if (depNode.requires && depNode.requires[target]) return true;
+                                                if (depNode.dependencies && depNode.dependencies[target]) return true;
+                                                
+                                                const subDeps = depNode.dependencies || {};
+                                                for (const subDepData of Object.values(subDeps)) {
+                                                    if (findInDependenciesTree(subDepData, target)) {
+                                                        return true;
+                                                    }
+                                                }
+                                                return false;
+                                            }
+                                            
+                                            for (const directDep of directDeps) {
+                                                if (findInDependenciesTree(lockDeps[directDep], name)) {
+                                                    resolvedParent = directDep;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    // Fallback 3: First direct dependency (inherited)
+                                    if (!resolvedParent) {
+                                        resolvedParent = defaultParent;
+                                    }
+                                }
+
+                                const existing = uniquePackages.get(name);
+                                if (!existing || depth < existing.depth) {
+                                    uniquePackages.set(name, {
+                                        name,
+                                        version,
+                                        depth,
+                                        isDirect: depth === 0,
+                                        parentName: depth === 0 ? null : resolvedParent
+                                    });
+                                }
+
+                                // Recurse
+                                await walk(fullPath, depth + 1, name);
+                            } catch (e) {
+                                // Skip invalid package.json
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Start walking from the root
+        await walk(projectPath, 0, null);
+
+        // Convert Map to Array and sort by depth
+        return Array.from(uniquePackages.values());
+    } catch (error) {
+        console.error(`Error building dependency tree: ${error.message}`);
+        return null;
+    }
+}
+
+module.exports = { getDependencyTree };
+
+// Test it if run directly
+if (require.main === module) {
+    getDependencyTree(process.cwd(), 3).then(tree => {
+        if (tree) {
+            console.log(`Total unique packages found: ${tree.length}`);
+            console.log('First 20 items (sorted by depth ASC):');
+            const sorted = tree.sort((a, b) => a.depth - b.depth || a.name.localeCompare(b.name));
+            console.log(JSON.stringify(sorted.slice(0, 20), null, 2));
+        }
+    });
+}

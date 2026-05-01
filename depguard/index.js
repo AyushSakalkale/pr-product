@@ -30,6 +30,23 @@ async function main() {
     }
 
     try {
+        const fs = require('fs');
+        const path = require('path');
+        const ignorePath = path.join(__dirname, '.depguardignore');
+        if (fs.existsSync(ignorePath)) {
+            const ignored = fs.readFileSync(ignorePath, 'utf8')
+                .split('\n')
+                .map(line => line.trim());
+            if (ignored.includes(packageName)) {
+                console.log(`${packageName} is in .depguardignore and will not be scored.`);
+                process.exit(0);
+            }
+        }
+    } catch (err) {
+        // Continue if ignore file check fails
+    }
+
+    try {
         // Step 1: Initial NPM registry call to find GitHub info
         const registryUrl = `https://registry.npmjs.org/${packageName}`;
         const registryRes = await axios.get(registryUrl);

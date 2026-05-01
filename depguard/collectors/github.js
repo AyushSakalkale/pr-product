@@ -1,4 +1,5 @@
 const axios = require('axios');
+const { trackRequest } = require('../utils/rateLimiter');
 
 /**
  * Fetches repository data from GitHub Public REST API.
@@ -9,15 +10,15 @@ const axios = require('axios');
  */
 async function getGithubData(owner, repo) {
     try {
+        await trackRequest();
+        const token = process.env.GITHUB_PAT || process.env.HUB_PAT || process.env.GITHUB_TOKEN;
+
         const config = {
             headers: {
-                'User-Agent': 'depguard-app'
+                'User-Agent': 'depguard-app',
+                'Authorization': token ? `token ${token}` : undefined
             }
         };
-
-        if (process.env.GITHUB_TOKEN) {
-            config.headers['Authorization'] = `token ${process.env.GITHUB_TOKEN}`;
-        }
 
         // 1. Fetch Repository Base Info
         const repoUrl = `https://api.github.com/repos/${owner}/${repo}`;
@@ -37,15 +38,10 @@ async function getGithubData(owner, repo) {
         const contributorsRes = await axios.get(contributorsUrl, config);
         const totalContributors = getCountFromLinkHeader(contributorsRes.headers.link) || (contributorsRes.data.length > 0 ? 1 : 0);
 
-        // 4. Fetch Closed Issues Count (using Search API for accuracy)
-        const closedIssuesSearchUrl = `https://api.github.com/search/issues?q=${encodeURIComponent(`repo:${full_name} type:issue state:closed`)}`;
-        const closedIssuesRes = await axios.get(closedIssuesSearchUrl, config);
-        const closedIssuesCount = closedIssuesRes.data.total_count;
+        // 4. Use open_issues_count from repo endpoint (free)
+        const openIssuesCount = open_issues_count;
+        const closedIssuesCount = 0; // Removing separate Search API call
 
-        // 5. Fetch Open Issues Count (using Search API to exclude PRs)
-        const openIssuesSearchUrl = `https://api.github.com/search/issues?q=${encodeURIComponent(`repo:${full_name} type:issue state:open`)}`;
-        const openIssuesRes = await axios.get(openIssuesSearchUrl, config);
-        const openIssuesCount = openIssuesRes.data.total_count;
 
         // Calculations
         const now = new Date();

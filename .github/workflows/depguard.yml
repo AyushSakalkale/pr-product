@@ -22,36 +22,35 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: 'depguard/package-lock.json'
 
       - name: Install DepGuard
         run: |
           cd depguard
           npm install
-          # Link the tool locally so it can be called via 'node index.js'
           echo "DEP_GUARD_PATH=$(pwd)/index.js" >> $GITHUB_ENV
 
       - name: Detect Changed Packages
         id: detect
         run: |
-          # Fetch main to compare
           git fetch origin main:main
-          
           CHANGED_PACKAGES=""
-          
-          # 1. Check package.json (NPM)
-          if git diff main...HEAD package.json | grep -q '^+'; then
-            NPM_CHANGES=$(git diff main...HEAD package.json | grep '^+ ' | grep '"' | cut -d'"' -f2 | sort -u | xargs)
+
+          # Compare old vs new package.json dependencies using jq on full file snapshots
+          if git diff main...HEAD -- package.json | grep -q '^+'; then
+            OLD_DEPS=$(git show main:package.json 2>/dev/null | jq -r '.dependencies // {} | keys[]' 2>/dev/null | sort || echo "")
+            NEW_DEPS=$(git show HEAD:package.json 2>/dev/null | jq -r '.dependencies // {} | keys[]' 2>/dev/null | sort || echo "")
+            NPM_CHANGES=$(comm -13 <(echo "$OLD_DEPS") <(echo "$NEW_DEPS") | xargs)
             CHANGED_PACKAGES="$CHANGED_PACKAGES $NPM_CHANGES"
           fi
-          
-          # 2. Check requirements.txt (Python) - Note: DepGuard currently defaults to NPM ecosystem in OSV
-          if git diff main...HEAD requirements.txt | grep -q '^+'; then
+
+          if git diff main...HEAD -- requirements.txt | grep -q '^+'; then
             PY_CHANGES=$(git diff main...HEAD requirements.txt | grep '^+[a-zA-Z]' | sed 's/+//' | cut -d'=' -f1 | cut -d'>' -f1 | xargs)
             CHANGED_PACKAGES="$CHANGED_PACKAGES $PY_CHANGES"
           fi
 
-          # Clean up and export
           PACKAGES=$(echo "$CHANGED_PACKAGES" | xargs)
           echo "packages=$PACKAGES" >> $GITHUB_OUTPUT
           echo "Detected packages: $PACKAGES"
@@ -60,33 +59,148 @@ jobs:
         if: steps.detect.outputs.packages != ''
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HUB_PAT: ${{ secrets.HUB_PAT }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          DEPGUARD_MODE: ${{ vars.DEPGUARD_MODE }}
         run: |
-          COMMENT_BODY="### 🛡️ DepGuard Dependency Analysis\n\n"
-          FAILED=false
+          MODE=${DEPGUARD_MODE:-warn}
+          HEADER="Mode: WARN — all PRs can merge, risks are advisory only"
+          if [ "$MODE" = "block" ]; then
+            HEADER="Mode: BLOCK — PRs with critical packages will be blocked"
+          fi
+          
+          COMMENT_BODY="### 🛡️ DepGuard Dependency Analysis\n$HEADER\n\n"
+          ANY_BLOCKED=false
+          RISKY_PACKAGES=""
           
           for pkg in ${{ steps.detect.outputs.packages }}; do
             echo "Analyzing $pkg..."
-            # Run depguard and capture output
             OUTPUT=$(node $DEP_GUARD_PATH $pkg)
-            
-            # Extract score and summary
             SCORE=$(echo "$OUTPUT" | grep "Final Score:" | awk '{print $3}')
+            MAINTENANCE=$(echo "$OUTPUT" | grep "Maintenance Score:" | awk '{print $3}')
             SUMMARY=$(echo "$OUTPUT" | sed -n '/----------------------------/,$p' | tail -n +3)
             
-            COMMENT_BODY="$COMMENT_BODY**Package:** \`$pkg\`  \n"
-            COMMENT_BODY="$COMMENT_BODY**Score:** $SCORE / 100  \n"
-            COMMENT_BODY="$COMMENT_BODY$SUMMARY\n\n---\n"
+            IS_BLOCKED=false
+            STATUS_MSG="✅ PASS"
             
-            if [ "$SCORE" -lt 50 ]; then
-              FAILED=true
+            # BLOCK Mode Conditions:
+            if [ "$SCORE" -lt 25 ]; then
+              IS_BLOCKED=true
+              STATUS_MSG="❌ MERGE BLOCKED"
+            elif echo "$SUMMARY" | grep -q "unpatched security flaws" && [ "$SCORE" -lt 40 ]; then
+              IS_BLOCKED=true
+              STATUS_MSG="❌ MERGE BLOCKED"
+            elif echo "$SUMMARY" | grep -q "officially archived" && [ "$SCORE" -lt 30 ]; then
+              IS_BLOCKED=true
+              STATUS_MSG="❌ MERGE BLOCKED"
+            elif [ "$SCORE" -lt 50 ]; then
+              STATUS_MSG="⚠️ REVIEW RECOMMENDED"
+            fi
+
+            COMMENT_BODY="$COMMENT_BODY**Package:** \`$pkg\`  \n"
+            COMMENT_BODY="$COMMENT_BODY**Status:** $STATUS_MSG \n"
+            COMMENT_BODY="$COMMENT_BODY**Score:** $SCORE / 100 | **Maintenance:** $MAINTENANCE / 100 \n"
+            
+            if [ "$STATUS_MSG" = "⚠️ REVIEW RECOMMENDED" ]; then
+                COMMENT_BODY="$COMMENT_BODY> This package has concerns but is not blocking merge. Review before proceeding.\n\n"
+                RISKY_PACKAGES="$RISKY_PACKAGES- $pkg (WARN: Score $SCORE)\n"
+            fi
+
+            COMMENT_BODY="$COMMENT_BODY<details><summary>Detailed Analysis</summary>\n\n$SUMMARY\n\n</details>\n\n---\n"
+            
+            if [ "$IS_BLOCKED" = true ]; then
+              ANY_BLOCKED=true
+              RISKY_PACKAGES="$RISKY_PACKAGES- $pkg (BLOCK: Score $SCORE)\n"
             fi
           done
           
-          # Post the comment to the PR
-          gh pr comment $PR_NUMBER --body "$(echo -e "$COMMENT_BODY")"
+          gh pr comment $PR_NUMBER --edit-last --body "$(echo -e "$COMMENT_BODY")" || gh pr comment $PR_NUMBER --body "$(echo -e "$COMMENT_BODY")"
           
-          if [ "$FAILED" = true ]; then
-            echo "One or more packages scored below 50. Failing the check."
+          if [ "$ANY_BLOCKED" = true ] && [ "$MODE" = "block" ]; then
+            echo -e "Critical risks detected:\n$RISKY_PACKAGES"
+            echo "Mode is set to BLOCK. Failing check."
             exit 1
+          else
+            if [ -n "$RISKY_PACKAGES" ]; then
+              echo -e "Scan complete. The following risky packages were found:\n$RISKY_PACKAGES"
+            else
+              echo "Scan complete. No risky packages found."
+            fi
+            echo "Mode is $MODE. Proceeding without blocking..."
+          fi
+
+  tree-scan:
+    needs: analyze
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      HUB_PAT: ${{ secrets.HUB_PAT }}
+      DEPGUARD_MODE: ${{ vars.DEPGUARD_MODE }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: 'depguard/package-lock.json'
+
+      - name: Install DepGuard Tool Dependencies
+        run: |
+          cd depguard
+          npm install
+
+      - name: Install Project Dependencies to Scan
+        run: |
+          if [ -f package.json ] && grep -q '"dependencies":' package.json; then
+            npm install
+          else
+            echo "No root dependencies to install."
+          fi
+
+      - name: Run Full Tree Scan
+        id: scan
+        run: |
+          SCAN_OUTPUT=$(echo 'n' | node depguard/scan.js .)
+          echo "scan_results<<EOF" >> $GITHUB_ENV
+          echo "$SCAN_OUTPUT" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Post Tree Scan Comment
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          MODE=${DEPGUARD_MODE:-warn}
+          HEADER="Mode: WARN — all PRs can merge, risks are advisory only"
+          if [ "$MODE" = "block" ]; then
+            HEADER="Mode: BLOCK — PRs with critical packages will be blocked"
+          fi
+
+          BLOCK_MSG=""
+          if echo "${{ env.scan_results }}" | grep "\[Transitive\]" | grep -E "\(([0-9]|1[0-9]|2[0-4])\/100\)"; then
+            BLOCK_MSG="❌ **CRITICAL TRANSITIVE RISKS DETECTED - MERGE BLOCKED**\n\n"
+          elif echo "${{ env.scan_results }}" | grep "\[Transitive\]" | grep -E "\(([2][5-9]|[3-4][0-9])\/100\)"; then
+            BLOCK_MSG="⚠️ **TRANSITIVE RISKS DETECTED - REVIEW RECOMMENDED**\n> This package has concerns but is not blocking merge. Review before proceeding.\n\n"
+          fi
+
+          FULL_BODY="### 🌲 DepGuard Tree Scan Results\n$HEADER\n\n${BLOCK_MSG}\`\`\`text\n${{ env.scan_results }}\n\`\`\`"
+          gh pr comment $PR_NUMBER --edit-last --body "$(echo -e "$FULL_BODY")" || gh pr comment $PR_NUMBER --body "$(echo -e "$FULL_BODY")"
+
+      - name: Evaluate Transitive Risks
+        run: |
+          MODE=${DEPGUARD_MODE:-warn}
+          if echo "${{ env.scan_results }}" | grep "\[Transitive\]" | grep -E "\(([0-9]|1[0-9]|2[0-4])\/100\)"; then
+            if [ "$MODE" = "block" ]; then
+              echo "Tree scan failed. Critical risk transitive dependency detected and mode is BLOCK."
+              exit 1
+            else
+              echo "Critical risk transitive dependency detected but mode is $MODE. Not blocking."
+            fi
           fi
