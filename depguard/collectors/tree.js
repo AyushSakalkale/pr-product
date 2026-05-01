@@ -116,7 +116,31 @@ async function getDependencyTree(projectPath, maxDepth = 3) {
                                         }
                                     }
 
-                                    // Fallback 2: First direct dependency (inherited)
+                                    // Fallback 2: Check nested node_modules and package.json of direct dependencies
+                                    if (!resolvedParent) {
+                                        for (const directDep of directDeps) {
+                                            const depPath = path.join(projectPath, 'node_modules', directDep);
+                                            
+                                            if (fs.existsSync(path.join(depPath, 'node_modules', name))) {
+                                                resolvedParent = directDep;
+                                                break;
+                                            }
+                                            
+                                            const pkgJsonPath = path.join(depPath, 'package.json');
+                                            if (fs.existsSync(pkgJsonPath)) {
+                                                try {
+                                                    const content = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf8'));
+                                                    const deps = { ...(content.dependencies || {}), ...(content.devDependencies || {}) };
+                                                    if (deps[name]) {
+                                                        resolvedParent = directDep;
+                                                        break;
+                                                    }
+                                                } catch (e) {}
+                                            }
+                                        }
+                                    }
+
+                                    // Fallback 3: First direct dependency (inherited)
                                     if (!resolvedParent) {
                                         resolvedParent = defaultParent;
                                     }
