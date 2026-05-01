@@ -11,7 +11,14 @@ function generateTreeReport(packages) {
 
     const criticalPackages = scored.filter(p => p.finalScore < 25);
     const highRiskPackages = scored.filter(p => p.finalScore >= 25 && p.finalScore < 50);
-    const transitiveRisks = scored.filter(p => !p.isDirect && p.finalScore < 50);
+    const transitiveRisks = scored
+        .filter(p => !p.isDirect && p.finalScore < 50)
+        .map(p => ({
+            name: p.name,
+            finalScore: p.finalScore,
+            isDirect: p.isDirect,
+            parentName: p.parentName
+        }));
 
     let worstPackage = null;
     if (scoredCount > 0) {

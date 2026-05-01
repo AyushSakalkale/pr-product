@@ -45,6 +45,7 @@ function printTreeReport(report) {
         console.log(`${COLORS.BOLD}TRANSITIVE RISKS SUMMARY (Hidden Dangers)${COLORS.RESET}`);
         transitiveRisks.forEach(pkg => {
             console.log(`- ${pkg.name} (${pkg.finalScore}/100)`);
+            console.log(`  Pulled in by: ${pkg.parentName || 'unknown'}`);
         });
         console.log('');
     }
