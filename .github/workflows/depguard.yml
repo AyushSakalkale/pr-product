@@ -37,16 +37,20 @@ jobs:
         run: |
           git fetch origin main:main
           CHANGED_PACKAGES=""
-          if git diff main...HEAD package.json | grep -q '^\+ '; then
-            # Extract added lines, remove plus sign, join into one line, and wrap in a JSON object
-            DIFF_CONTENT=$(git diff main...HEAD package.json | grep '^\+ ' | sed 's/^\+//' | tr -d '\n' | sed 's/,$//')
-            NPM_CHANGES=$(echo "{ \"dependencies\": { $DIFF_CONTENT } }" | jq -r '.dependencies // {} | keys[]' | xargs)
+
+          # Compare old vs new package.json dependencies using jq on full file snapshots
+          if git diff main...HEAD -- package.json | grep -q '^+'; then
+            OLD_DEPS=$(git show main:package.json 2>/dev/null | jq -r '.dependencies // {} | keys[]' 2>/dev/null | sort || echo "")
+            NEW_DEPS=$(git show HEAD:package.json 2>/dev/null | jq -r '.dependencies // {} | keys[]' 2>/dev/null | sort || echo "")
+            NPM_CHANGES=$(comm -13 <(echo "$OLD_DEPS") <(echo "$NEW_DEPS") | xargs)
             CHANGED_PACKAGES="$CHANGED_PACKAGES $NPM_CHANGES"
           fi
-          if git diff main...HEAD requirements.txt | grep -q '^+'; then
+
+          if git diff main...HEAD -- requirements.txt | grep -q '^+'; then
             PY_CHANGES=$(git diff main...HEAD requirements.txt | grep '^+[a-zA-Z]' | sed 's/+//' | cut -d'=' -f1 | cut -d'>' -f1 | xargs)
             CHANGED_PACKAGES="$CHANGED_PACKAGES $PY_CHANGES"
           fi
+
           PACKAGES=$(echo "$CHANGED_PACKAGES" | xargs)
           echo "packages=$PACKAGES" >> $GITHUB_OUTPUT
           echo "Detected packages: $PACKAGES"
