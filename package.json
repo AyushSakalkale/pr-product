@@ -3,6 +3,6 @@
     "lodash": "4.17.21",
     "event-stream": "3.3.4",
     "colors": "1.4.0",
-    "dummy": "1.0.0"
+    "dummy": "1.0.1"
   }
 }

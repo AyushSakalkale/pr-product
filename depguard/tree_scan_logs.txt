@@ -1,0 +1,214 @@
+﻿2026-05-01T19:51:11.8106465Z Current runner version: '2.334.0'
+2026-05-01T19:51:11.8128344Z ##[group]Runner Image Provisioner
+2026-05-01T19:51:11.8129094Z Hosted Compute Agent
+2026-05-01T19:51:11.8129547Z Version: 20260213.493
+2026-05-01T19:51:11.8130106Z Commit: 5c115507f6dd24b8de37d8bbe0bb4509d0cc0fa3
+2026-05-01T19:51:11.8130763Z Build Date: 2026-02-13T00:28:41Z
+2026-05-01T19:51:11.8131329Z Worker ID: {9a2de9b4-3506-4542-af99-d537a8d72fff}
+2026-05-01T19:51:11.8131936Z Azure Region: centralus
+2026-05-01T19:51:11.8132386Z ##[endgroup]
+2026-05-01T19:51:11.8133654Z ##[group]Operating System
+2026-05-01T19:51:11.8134210Z Ubuntu
+2026-05-01T19:51:11.8134614Z 24.04.4
+2026-05-01T19:51:11.8135040Z LTS
+2026-05-01T19:51:11.8135444Z ##[endgroup]
+2026-05-01T19:51:11.8135850Z ##[group]Runner Image
+2026-05-01T19:51:11.8136535Z Image: ubuntu-24.04
+2026-05-01T19:51:11.8137006Z Version: 20260413.86.1
+2026-05-01T19:51:11.8138038Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260413.86/images/ubuntu/Ubuntu2404-Readme.md
+2026-05-01T19:51:11.8139264Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260413.86
+2026-05-01T19:51:11.8140027Z ##[endgroup]
+2026-05-01T19:51:11.8140979Z ##[group]GITHUB_TOKEN Permissions
+2026-05-01T19:51:11.8142729Z Metadata: read
+2026-05-01T19:51:11.8143206Z PullRequests: write
+2026-05-01T19:51:11.8143675Z ##[endgroup]
+2026-05-01T19:51:11.8145445Z Secret source: Actions
+2026-05-01T19:51:11.8146217Z Prepare workflow directory
+2026-05-01T19:51:11.8631247Z Prepare all required actions
+2026-05-01T19:51:11.8666891Z Getting action download info
+2026-05-01T19:51:12.1888881Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+2026-05-01T19:51:12.2676363Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-05-01T19:51:12.4115359Z Complete job name: tree-scan
+2026-05-01T19:51:12.4693458Z ##[group]Run actions/checkout@v4
+2026-05-01T19:51:12.4694304Z with:
+2026-05-01T19:51:12.4694718Z   fetch-depth: 0
+2026-05-01T19:51:12.4695166Z   repository: AyushSakalkale/pr-product
+2026-05-01T19:51:12.4695896Z   token: ***
+2026-05-01T19:51:12.4696498Z   ssh-strict: true
+2026-05-01T19:51:12.4696911Z   ssh-user: git
+2026-05-01T19:51:12.4697371Z   persist-credentials: true
+2026-05-01T19:51:12.4697801Z   clean: true
+2026-05-01T19:51:12.4698231Z   sparse-checkout-cone-mode: true
+2026-05-01T19:51:12.4698697Z   fetch-tags: false
+2026-05-01T19:51:12.4699125Z   show-progress: true
+2026-05-01T19:51:12.4699540Z   lfs: false
+2026-05-01T19:51:12.4699939Z   submodules: false
+2026-05-01T19:51:12.4700377Z   set-safe-directory: true
+2026-05-01T19:51:12.4701062Z env:
+2026-05-01T19:51:12.4701639Z   GITHUB_TOKEN: ***
+2026-05-01T19:51:12.4702579Z   GITHUB_PAT: ***
+2026-05-01T19:51:12.4703035Z ##[endgroup]
+2026-05-01T19:51:12.5821485Z Syncing repository: AyushSakalkale/pr-product
+2026-05-01T19:51:12.5823156Z ##[group]Getting Git version info
+2026-05-01T19:51:12.5823771Z Working directory is '/home/runner/work/pr-product/pr-product'
+2026-05-01T19:51:12.5824623Z [command]/usr/bin/git version
+2026-05-01T19:51:12.5854667Z git version 2.53.0
+2026-05-01T19:51:12.5876824Z ##[endgroup]
+2026-05-01T19:51:12.5888870Z Temporarily overriding HOME='/home/runner/work/_temp/dd719251-6359-443c-85e6-8886af3129f2' before making global git config changes
+2026-05-01T19:51:12.5890548Z Adding repository directory to the temporary git global config as a safe directory
+2026-05-01T19:51:12.5893160Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/pr-product/pr-product
+2026-05-01T19:51:12.5918574Z Deleting the contents of '/home/runner/work/pr-product/pr-product'
+2026-05-01T19:51:12.5921752Z ##[group]Initializing the repository
+2026-05-01T19:51:12.5925419Z [command]/usr/bin/git init /home/runner/work/pr-product/pr-product
+2026-05-01T19:51:12.5985369Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-05-01T19:51:12.5987019Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-05-01T19:51:12.5988735Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-05-01T19:51:12.5989826Z hint: call:
+2026-05-01T19:51:12.5990365Z hint:
+2026-05-01T19:51:12.5991056Z hint: 	git config --global init.defaultBranch <name>
+2026-05-01T19:51:12.5991883Z hint:
+2026-05-01T19:51:12.5992678Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-05-01T19:51:12.5994060Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-05-01T19:51:12.5995176Z hint:
+2026-05-01T19:51:12.5995720Z hint: 	git branch -m <name>
+2026-05-01T19:51:12.5996526Z hint:
+2026-05-01T19:51:12.5997419Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-05-01T19:51:12.5998938Z Initialized empty Git repository in /home/runner/work/pr-product/pr-product/.git/
+2026-05-01T19:51:12.6001407Z [command]/usr/bin/git remote add origin https://github.com/AyushSakalkale/pr-product
+2026-05-01T19:51:12.6022919Z ##[endgroup]
+2026-05-01T19:51:12.6024262Z ##[group]Disabling automatic garbage collection
+2026-05-01T19:51:12.6027279Z [command]/usr/bin/git config --local gc.auto 0
+2026-05-01T19:51:12.6048420Z ##[endgroup]
+2026-05-01T19:51:12.6049322Z ##[group]Setting up auth
+2026-05-01T19:51:12.6053951Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-05-01T19:51:12.6077011Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-05-01T19:51:12.6298883Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-05-01T19:51:12.6321719Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-05-01T19:51:12.6481948Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-05-01T19:51:12.6511896Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-05-01T19:51:12.6677624Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-05-01T19:51:12.6702426Z ##[endgroup]
+2026-05-01T19:51:12.6703074Z ##[group]Fetching the repository
+2026-05-01T19:51:12.6710649Z [command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/* +84e7fb230256b2de9bead5615f96469419003502:refs/remotes/pull/1/merge
+2026-05-01T19:51:13.2889221Z From https://github.com/AyushSakalkale/pr-product
+2026-05-01T19:51:13.2890761Z  * [new branch]      main                                     -> origin/main
+2026-05-01T19:51:13.2892646Z  * [new branch]      test/depguard-action                     -> origin/test/depguard-action
+2026-05-01T19:51:13.2894561Z  * [new ref]         84e7fb230256b2de9bead5615f96469419003502 -> pull/1/merge
+2026-05-01T19:51:13.2916378Z ##[endgroup]
+2026-05-01T19:51:13.2918542Z ##[group]Determining the checkout info
+2026-05-01T19:51:13.2920902Z ##[endgroup]
+2026-05-01T19:51:13.2924253Z [command]/usr/bin/git sparse-checkout disable
+2026-05-01T19:51:13.2953908Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-05-01T19:51:13.2975263Z ##[group]Checking out the ref
+2026-05-01T19:51:13.2979215Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/1/merge
+2026-05-01T19:51:13.3013154Z Note: switching to 'refs/remotes/pull/1/merge'.
+2026-05-01T19:51:13.3018320Z 
+2026-05-01T19:51:13.3019608Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-05-01T19:51:13.3022375Z changes and commit them, and you can discard any commits you make in this
+2026-05-01T19:51:13.3025326Z state without impacting any branches by switching back to a branch.
+2026-05-01T19:51:13.3027261Z 
+2026-05-01T19:51:13.3028539Z If you want to create a new branch to retain commits you create, you may
+2026-05-01T19:51:13.3030531Z do so (now or later) by using -c with the switch command. Example:
+2026-05-01T19:51:13.3031518Z 
+2026-05-01T19:51:13.3032045Z   git switch -c <new-branch-name>
+2026-05-01T19:51:13.3033059Z 
+2026-05-01T19:51:13.3033631Z Or undo this operation with:
+2026-05-01T19:51:13.3034621Z 
+2026-05-01T19:51:13.3035111Z   git switch -
+2026-05-01T19:51:13.3035694Z 
+2026-05-01T19:51:13.3036820Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-05-01T19:51:13.3038113Z 
+2026-05-01T19:51:13.3039731Z HEAD is now at 84e7fb2 Merge 86276f078fcdad91ae31f0b5e669218ff05c6532 into af0481e6e74fd92360e6aa08af0ec8868c389c53
+2026-05-01T19:51:13.3046552Z ##[endgroup]
+2026-05-01T19:51:13.3050272Z [command]/usr/bin/git log -1 --format=%H
+2026-05-01T19:51:13.3067898Z 84e7fb230256b2de9bead5615f96469419003502
+2026-05-01T19:51:13.3363858Z ##[group]Run actions/setup-node@v4
+2026-05-01T19:51:13.3364935Z with:
+2026-05-01T19:51:13.3365709Z   node-version: 18
+2026-05-01T19:51:13.3366814Z   always-auth: false
+2026-05-01T19:51:13.3367663Z   check-latest: false
+2026-05-01T19:51:13.3368794Z   token: ***
+2026-05-01T19:51:13.3369519Z env:
+2026-05-01T19:51:13.3370503Z   GITHUB_TOKEN: ***
+2026-05-01T19:51:13.3371543Z   GITHUB_PAT: ***
+2026-05-01T19:51:13.3372320Z ##[endgroup]
+2026-05-01T19:51:13.5000069Z Attempting to download 18...
+2026-05-01T19:51:14.0799299Z Acquiring 18.20.8 - x64 from https://github.com/actions/node-versions/releases/download/18.20.8-14110393767/node-18.20.8-linux-x64.tar.gz
+2026-05-01T19:51:14.6342301Z Extracting ...
+2026-05-01T19:51:14.6445077Z [command]/usr/bin/tar xz --strip 1 --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/61e26925-7199-40d0-9377-6b5270e2fa92 -f /home/runner/work/_temp/43e027ba-b261-4ea8-8fad-cf2b85ce6201
+2026-05-01T19:51:15.5358684Z Adding to the cache ...
+2026-05-01T19:51:16.6577536Z ##[group]Environment details
+2026-05-01T19:51:16.8707145Z node: v18.20.8
+2026-05-01T19:51:16.8707721Z npm: 10.8.2
+2026-05-01T19:51:16.8707984Z yarn: 1.22.22
+2026-05-01T19:51:16.8708595Z ##[endgroup]
+2026-05-01T19:51:16.8834945Z ##[group]Run cd depguard
+2026-05-01T19:51:16.8835294Z [36;1mcd depguard[0m
+2026-05-01T19:51:16.8835511Z [36;1mnpm install[0m
+2026-05-01T19:51:16.8854326Z shell: /usr/bin/bash -e {0}
+2026-05-01T19:51:16.8854575Z env:
+2026-05-01T19:51:16.8855024Z   GITHUB_TOKEN: ***
+2026-05-01T19:51:16.8855332Z   GITHUB_PAT: ***
+2026-05-01T19:51:16.8855514Z ##[endgroup]
+2026-05-01T19:51:17.2644376Z npm warn EBADENGINE Unsupported engine {
+2026-05-01T19:51:17.2645254Z npm warn EBADENGINE   package: 'p-limit@7.3.0',
+2026-05-01T19:51:17.2645829Z npm warn EBADENGINE   required: { node: '>=20' },
+2026-05-01T19:51:17.2646856Z npm warn EBADENGINE   current: { node: 'v18.20.8', npm: '10.8.2' }
+2026-05-01T19:51:17.2647397Z npm warn EBADENGINE }
+2026-05-01T19:51:17.9310393Z npm warn deprecated readdir-scoped-modules@1.1.0: This functionality has been moved to @npmcli/fs
+2026-05-01T19:51:18.0202579Z npm warn deprecated read-package-tree@5.3.1: The functionality that this package provided is now in @npmcli/arborist
+2026-05-01T19:51:18.0553962Z npm warn deprecated read-package-json@2.1.2: This package is no longer supported. Please use @npmcli/package-json instead.
+2026-05-01T19:51:18.1204345Z npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+2026-05-01T19:51:18.1642322Z npm warn deprecated debuglog@1.0.1: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
+2026-05-01T19:51:18.1748855Z npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+2026-05-01T19:51:18.6263449Z 
+2026-05-01T19:51:18.6265066Z added 137 packages, and audited 138 packages in 2s
+2026-05-01T19:51:18.6265600Z 
+2026-05-01T19:51:18.6266161Z 79 packages are looking for funding
+2026-05-01T19:51:18.6266643Z   run `npm fund` for details
+2026-05-01T19:51:18.6274218Z 
+2026-05-01T19:51:18.6275030Z found 0 vulnerabilities
+2026-05-01T19:51:18.6373117Z ##[group]Run # Use piped input 'n' to select the top 20 alphabetically and avoid terminal hang
+2026-05-01T19:51:18.6373691Z [36;1m# Use piped input 'n' to select the top 20 alphabetically and avoid terminal hang[0m
+2026-05-01T19:51:18.6374101Z [36;1mSCAN_OUTPUT=$(echo 'n' | node depguard/scan.js .)[0m
+2026-05-01T19:51:18.6374366Z [36;1m[0m
+2026-05-01T19:51:18.6374585Z [36;1m# Use multi-line output handling for GitHub Actions[0m
+2026-05-01T19:51:18.6374886Z [36;1mecho "scan_results<<EOF" >> $GITHUB_ENV[0m
+2026-05-01T19:51:18.6375151Z [36;1mecho "$SCAN_OUTPUT" >> $GITHUB_ENV[0m
+2026-05-01T19:51:18.6375382Z [36;1mecho "EOF" >> $GITHUB_ENV[0m
+2026-05-01T19:51:18.6375600Z [36;1m[0m
+2026-05-01T19:51:18.6375757Z [36;1mecho "$SCAN_OUTPUT"[0m
+2026-05-01T19:51:18.6389606Z shell: /usr/bin/bash -e {0}
+2026-05-01T19:51:18.6389832Z env:
+2026-05-01T19:51:18.6390189Z   GITHUB_TOKEN: ***
+2026-05-01T19:51:18.6390459Z   GITHUB_PAT: ***
+2026-05-01T19:51:18.6390636Z ##[endgroup]
+2026-05-01T19:51:18.6910149Z /home/runner/work/pr-product/pr-product/depguard/scorer/treeScorer.js:1
+2026-05-01T19:51:18.6910996Z const pLimit = require('p-limit').default;
+2026-05-01T19:51:18.6911429Z                ^
+2026-05-01T19:51:18.6911615Z 
+2026-05-01T19:51:18.6912750Z Error [ERR_REQUIRE_ESM]: require() of ES Module /home/runner/work/pr-product/pr-product/depguard/node_modules/p-limit/index.js from /home/runner/work/pr-product/pr-product/depguard/scorer/treeScorer.js not supported.
+2026-05-01T19:51:18.6914101Z Instead change the require of index.js in /home/runner/work/pr-product/pr-product/depguard/scorer/treeScorer.js to a dynamic import() which is available in all CommonJS modules.
+2026-05-01T19:51:18.6914988Z     at Object.<anonymous> (/home/runner/work/pr-product/pr-product/depguard/scorer/treeScorer.js:1:16)
+2026-05-01T19:51:18.6915601Z     at Object.<anonymous> (/home/runner/work/pr-product/pr-product/depguard/scan.js:6:23) {
+2026-05-01T19:51:18.6916157Z   code: 'ERR_REQUIRE_ESM'
+2026-05-01T19:51:18.6916449Z }
+2026-05-01T19:51:18.6916541Z 
+2026-05-01T19:51:18.6916613Z Node.js v18.20.8
+2026-05-01T19:51:18.6935488Z ##[error]Process completed with exit code 1.
+2026-05-01T19:51:18.7049689Z Post job cleanup.
+2026-05-01T19:51:18.7928562Z [command]/usr/bin/git version
+2026-05-01T19:51:18.7960958Z git version 2.53.0
+2026-05-01T19:51:18.8007346Z Temporarily overriding HOME='/home/runner/work/_temp/fe590cb0-7aba-452e-802c-96cf0e5ea4ae' before making global git config changes
+2026-05-01T19:51:18.8008218Z Adding repository directory to the temporary git global config as a safe directory
+2026-05-01T19:51:18.8012063Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/pr-product/pr-product
+2026-05-01T19:51:18.8039876Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-05-01T19:51:18.8065344Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-05-01T19:51:18.8233821Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-05-01T19:51:18.8252525Z http.https://github.com/.extraheader
+2026-05-01T19:51:18.8263564Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-05-01T19:51:18.8287439Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-05-01T19:51:18.8453552Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-05-01T19:51:18.8478451Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-05-01T19:51:18.8748554Z Cleaning up orphan processes
+2026-05-01T19:51:18.8949971Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4, actions/setup-node@v4. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Node.js 20 will be removed from the runner on September 16th, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

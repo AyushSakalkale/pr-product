@@ -1,4 +1,3 @@
-const pLimit = require('p-limit').default;
 const { getGithubData } = require('../collectors/github');
 const { getNpmData } = require('../collectors/npm');
 const { getSecurityData } = require('../collectors/security');
@@ -24,6 +23,8 @@ function extractGithubInfo(repository) {
  * @returns {Promise<Array>} - Array of scored package objects.
  */
 async function scoreTree(packages, concurrency = 5) {
+    // Dynamic import for p-limit to support ESM in CJS
+    const pLimit = (await import('p-limit')).default;
     const limit = pLimit(concurrency);
     const total = packages.length;
     let completed = 0;
@@ -31,19 +32,14 @@ async function scoreTree(packages, concurrency = 5) {
     const tasks = packages.map(pkg => {
         return limit(async () => {
             try {
-                // Step 1: Get NPM data first to resolve GitHub repository
                 const npmData = await getNpmData(pkg.name);
-                
-                // Step 2: Resolve GitHub info from NPM metadata
                 const githubInfo = npmData ? extractGithubInfo(npmData.repository) : null;
 
-                // Step 3: Fetch GitHub and Security data in parallel
                 const [githubData, securityData] = await Promise.all([
                     githubInfo ? getGithubData(githubInfo.owner, githubInfo.repo) : Promise.resolve(null),
                     getSecurityData(pkg.name)
                 ]);
 
-                // Calculate final health scores
                 const scores = calculateScore(githubData, npmData, securityData);
 
                 completed++;
