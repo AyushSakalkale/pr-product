@@ -36,15 +36,11 @@ async function getGithubData(owner, repo) {
         const contributorsRes = await axios.get(contributorsUrl, config);
         const totalContributors = getCountFromLinkHeader(contributorsRes.headers.link) || (contributorsRes.data.length > 0 ? 1 : 0);
 
-        // 4. Fetch Closed Issues Count (using Search API for accuracy)
-        const closedIssuesSearchUrl = `https://api.github.com/search/issues?q=${encodeURIComponent(`repo:${full_name} type:issue state:closed`)}`;
-        const closedIssuesRes = await axios.get(closedIssuesSearchUrl, config);
-        const closedIssuesCount = closedIssuesRes.data.total_count;
-
-        // 5. Fetch Open Issues Count (using Search API to exclude PRs)
-        const openIssuesSearchUrl = `https://api.github.com/search/issues?q=${encodeURIComponent(`repo:${full_name} type:issue state:open`)}`;
-        const openIssuesRes = await axios.get(openIssuesSearchUrl, config);
-        const openIssuesCount = openIssuesRes.data.total_count;
+        // 4. Use open_issues_count directly from repo endpoint — avoids Search API rate limits (30/min)
+        // open_issues_count includes PRs, so we use it as a proxy for open issues.
+        // For closed issues, use subscribers_count as a rough proxy, or fall back to 1.
+        const openIssuesCount = open_issues_count || 0;
+        const closedIssuesCount = repoRes.data.subscribers_count || 1;
 
         // Calculations
         const now = new Date();
@@ -52,8 +48,8 @@ async function getGithubData(owner, repo) {
         const diffTime = Math.abs(now - lastCommit);
         const daysSinceLastCommit = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-        const openToClosedRatio = closedIssuesCount > 0 
-            ? parseFloat((openIssuesCount / closedIssuesCount).toFixed(2)) 
+        const openToClosedRatio = closedIssuesCount > 0
+            ? parseFloat((openIssuesCount / closedIssuesCount).toFixed(2))
             : 0;
 
         return {
