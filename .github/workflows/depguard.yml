@@ -68,7 +68,7 @@ jobs:
               FAILED=true
             fi
           done
-          gh pr comment $PR_NUMBER --body "$(echo -e "$COMMENT_BODY")"
+          gh pr comment $PR_NUMBER --edit-last --body "$(echo -e "$COMMENT_BODY")" || gh pr comment $PR_NUMBER --body "$(echo -e "$COMMENT_BODY")"
           if [ "$FAILED" = true ]; then
             echo "One or more packages scored below 50. Failing the check."
             exit 1
@@ -125,7 +125,10 @@ jobs:
         env:
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          gh pr comment $PR_NUMBER --body "### 🌲 DepGuard Tree Scan Results
+          gh pr comment $PR_NUMBER --edit-last --body "### 🌲 DepGuard Tree Scan Results
+          \`\`\`text
+          ${{ env.scan_results }}
+          \`\`\`" || gh pr comment $PR_NUMBER --body "### 🌲 DepGuard Tree Scan Results
           \`\`\`text
           ${{ env.scan_results }}
           \`\`\`"
