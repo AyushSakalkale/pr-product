@@ -71,6 +71,7 @@ jobs:
           
           COMMENT_BODY="### 🛡️ DepGuard Dependency Analysis\n$HEADER\n\n"
           ANY_BLOCKED=false
+          RISKY_PACKAGES=""
           
           for pkg in ${{ steps.detect.outputs.packages }}; do
             echo "Analyzing $pkg..."
@@ -102,22 +103,30 @@ jobs:
             
             if [ "$STATUS_MSG" = "⚠️ REVIEW RECOMMENDED" ]; then
                 COMMENT_BODY="$COMMENT_BODY> This package has concerns but is not blocking merge. Review before proceeding.\n\n"
+                RISKY_PACKAGES="$RISKY_PACKAGES- $pkg (WARN: Score $SCORE)\n"
             fi
 
             COMMENT_BODY="$COMMENT_BODY<details><summary>Detailed Analysis</summary>\n\n$SUMMARY\n\n</details>\n\n---\n"
             
             if [ "$IS_BLOCKED" = true ]; then
               ANY_BLOCKED=true
+              RISKY_PACKAGES="$RISKY_PACKAGES- $pkg (BLOCK: Score $SCORE)\n"
             fi
           done
           
           gh pr comment $PR_NUMBER --edit-last --body "$(echo -e "$COMMENT_BODY")" || gh pr comment $PR_NUMBER --body "$(echo -e "$COMMENT_BODY")"
           
           if [ "$ANY_BLOCKED" = true ] && [ "$MODE" = "block" ]; then
-            echo "Critical risks detected and mode is set to BLOCK. Failing check."
+            echo -e "Critical risks detected:\n$RISKY_PACKAGES"
+            echo "Mode is set to BLOCK. Failing check."
             exit 1
           else
-            echo "Scan complete. Mode is $MODE. Proceeding..."
+            if [ -n "$RISKY_PACKAGES" ]; then
+              echo -e "Scan complete. The following risky packages were found:\n$RISKY_PACKAGES"
+            else
+              echo "Scan complete. No risky packages found."
+            fi
+            echo "Mode is $MODE. Proceeding without blocking..."
           fi
 
   tree-scan:
