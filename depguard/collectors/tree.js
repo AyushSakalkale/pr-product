@@ -21,6 +21,24 @@ async function getDependencyTree(projectPath, maxDepth = 3) {
             ...Object.keys(rootContent.devDependencies || {})
         ]);
 
+        // Pre-build a map of who depends on what at the top level
+        // mapping subDepName -> directDepName
+        const transitiveParentMap = new Map();
+        for (const directDep of directDeps) {
+            try {
+                const directDepPkgJson = path.join(projectPath, 'node_modules', directDep, 'package.json');
+                if (fs.existsSync(directDepPkgJson)) {
+                    const content = JSON.parse(fs.readFileSync(directDepPkgJson, 'utf8'));
+                    const subDeps = Object.keys(content.dependencies || {});
+                    for (const subDep of subDeps) {
+                        if (!transitiveParentMap.has(subDep)) {
+                            transitiveParentMap.set(subDep, directDep);
+                        }
+                    }
+                }
+            } catch (e) { /* skip */ }
+        }
+
         /**
          * Recursive walker
          */
@@ -61,11 +79,15 @@ async function getDependencyTree(projectPath, maxDepth = 3) {
                                 const version = content.version;
                                 
                                 // Determine depth: 0 if in root package.json AND at root node_modules
-                                // Otherwise, use currentDepth.
-                                // Note: In a flattened tree, everything in root/node_modules is technically depth 0 or 1.
                                 let depth = currentDepth;
                                 if (currentDepth === 0 && !directDeps.has(name)) {
                                     depth = 1; // Flattened transitive dependency
+                                }
+
+                                // Resolve parent name for flattened transitive deps
+                                let resolvedParent = parentName;
+                                if (depth === 1 && !resolvedParent) {
+                                    resolvedParent = transitiveParentMap.get(name) || null;
                                 }
 
                                 const existing = uniquePackages.get(name);
@@ -75,7 +97,7 @@ async function getDependencyTree(projectPath, maxDepth = 3) {
                                         version,
                                         depth,
                                         isDirect: depth === 0,
-                                        parentName: depth === 0 ? null : parentName || 'root'
+                                        parentName: depth === 0 ? null : resolvedParent
                                     });
                                 }
 
