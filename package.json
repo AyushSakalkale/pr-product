@@ -1,1 +1,6 @@
-{"dependencies": {"event-stream": "3.3.4"}}
+{
+  "dependencies": {
+    "lodash": "4.17.21",
+    "event-stream": "3.3.4"
+  }
+}
