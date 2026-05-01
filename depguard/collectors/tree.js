@@ -101,22 +101,7 @@ async function getDependencyTree(projectPath, maxDepth = 3) {
                                 if (depth === 1 && !resolvedParent) {
                                     resolvedParent = transitiveParentMap.get(name) || null;
                                     
-                                    // Fallback 1: Search package-lock.json
-                                    if (!resolvedParent && packageLock) {
-                                        const lockPackages = packageLock.packages || {};
-                                        for (const directDep of directDeps) {
-                                            const lockEntry = lockPackages[`node_modules/${directDep}`] || lockPackages[directDep];
-                                            if (lockEntry) {
-                                                const subDeps = { ...(lockEntry.dependencies || {}), ...(lockEntry.devDependencies || {}) };
-                                                if (subDeps[name]) {
-                                                    resolvedParent = directDep;
-                                                    break;
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    // Fallback 2: Check nested node_modules and package.json of direct dependencies
+                                    // Fallback 1: Check nested node_modules and package.json of direct dependencies
                                     if (!resolvedParent) {
                                         for (const directDep of directDeps) {
                                             const depPath = path.join(projectPath, 'node_modules', directDep);
@@ -136,6 +121,65 @@ async function getDependencyTree(projectPath, maxDepth = 3) {
                                                         break;
                                                     }
                                                 } catch (e) {}
+                                            }
+                                        }
+                                    }
+
+                                    // Fallback 2: Recursive Lockfile Trace
+                                    if (!resolvedParent && packageLock) {
+                                        if (packageLock.packages) {
+                                            const lockPackages = packageLock.packages;
+                                            
+                                            function findInPackagesTree(currentPath, target, visited = new Set()) {
+                                                if (visited.has(currentPath)) return false;
+                                                visited.add(currentPath);
+                                                
+                                                const pkgData = lockPackages[currentPath];
+                                                if (!pkgData) return false;
+                                                
+                                                const deps = { ...(pkgData.dependencies || {}), ...(pkgData.devDependencies || {}) };
+                                                if (deps[target]) return true;
+                                                
+                                                for (const depName of Object.keys(deps)) {
+                                                    let nextPath = `${currentPath}/node_modules/${depName}`;
+                                                    if (!lockPackages[nextPath]) {
+                                                        nextPath = `node_modules/${depName}`;
+                                                    }
+                                                    if (findInPackagesTree(nextPath, target, visited)) {
+                                                        return true;
+                                                    }
+                                                }
+                                                return false;
+                                            }
+
+                                            for (const directDep of directDeps) {
+                                                if (findInPackagesTree(`node_modules/${directDep}`, name)) {
+                                                    resolvedParent = directDep;
+                                                    break;
+                                                }
+                                            }
+                                        } else if (packageLock.dependencies) {
+                                            const lockDeps = packageLock.dependencies;
+                                            
+                                            function findInDependenciesTree(depNode, target) {
+                                                if (!depNode) return false;
+                                                if (depNode.requires && depNode.requires[target]) return true;
+                                                if (depNode.dependencies && depNode.dependencies[target]) return true;
+                                                
+                                                const subDeps = depNode.dependencies || {};
+                                                for (const subDepData of Object.values(subDeps)) {
+                                                    if (findInDependenciesTree(subDepData, target)) {
+                                                        return true;
+                                                    }
+                                                }
+                                                return false;
+                                            }
+                                            
+                                            for (const directDep of directDeps) {
+                                                if (findInDependenciesTree(lockDeps[directDep], name)) {
+                                                    resolvedParent = directDep;
+                                                    break;
+                                                }
                                             }
                                         }
                                     }
