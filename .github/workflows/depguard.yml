@@ -28,30 +28,21 @@ jobs:
         run: |
           cd depguard
           npm install
-          # Link the tool locally so it can be called via 'node index.js'
           echo "DEP_GUARD_PATH=$(pwd)/index.js" >> $GITHUB_ENV
 
       - name: Detect Changed Packages
         id: detect
         run: |
-          # Fetch main to compare
           git fetch origin main:main
-          
           CHANGED_PACKAGES=""
-          
-          # 1. Check package.json (NPM)
           if git diff main...HEAD package.json | grep -q '^+'; then
             NPM_CHANGES=$(git diff main...HEAD package.json | grep '^+ ' | grep '"' | cut -d'"' -f2 | sort -u | xargs)
             CHANGED_PACKAGES="$CHANGED_PACKAGES $NPM_CHANGES"
           fi
-          
-          # 2. Check requirements.txt (Python) - Note: DepGuard currently defaults to NPM ecosystem in OSV
           if git diff main...HEAD requirements.txt | grep -q '^+'; then
             PY_CHANGES=$(git diff main...HEAD requirements.txt | grep '^+[a-zA-Z]' | sed 's/+//' | cut -d'=' -f1 | cut -d'>' -f1 | xargs)
             CHANGED_PACKAGES="$CHANGED_PACKAGES $PY_CHANGES"
           fi
-
-          # Clean up and export
           PACKAGES=$(echo "$CHANGED_PACKAGES" | xargs)
           echo "packages=$PACKAGES" >> $GITHUB_OUTPUT
           echo "Detected packages: $PACKAGES"
@@ -64,30 +55,71 @@ jobs:
         run: |
           COMMENT_BODY="### 🛡️ DepGuard Dependency Analysis\n\n"
           FAILED=false
-          
           for pkg in ${{ steps.detect.outputs.packages }}; do
             echo "Analyzing $pkg..."
-            # Run depguard and capture output
             OUTPUT=$(node $DEP_GUARD_PATH $pkg)
-            
-            # Extract scores and summary
             SCORE=$(echo "$OUTPUT" | grep "Final Score:" | awk '{print $3}')
             MAINTENANCE=$(echo "$OUTPUT" | grep "Maintenance Score:" | awk '{print $3}')
             SUMMARY=$(echo "$OUTPUT" | sed -n '/----------------------------/,$p' | tail -n +3)
-            
             COMMENT_BODY="$COMMENT_BODY**Package:** \`$pkg\`  \n"
             COMMENT_BODY="$COMMENT_BODY**Score:** $SCORE / 100 | **Maintenance:** $MAINTENANCE / 100 \n"
             COMMENT_BODY="$COMMENT_BODY<details><summary>Detailed Analysis</summary>\n\n$SUMMARY\n\n</details>\n\n---\n"
-            
             if [ "$SCORE" -lt 50 ]; then
               FAILED=true
             fi
           done
-          
-          # Post the comment to the PR
           gh pr comment $PR_NUMBER --body "$(echo -e "$COMMENT_BODY")"
-          
           if [ "$FAILED" = true ]; then
             echo "One or more packages scored below 50. Failing the check."
+            exit 1
+          fi
+
+  tree-scan:
+    needs: analyze
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install DepGuard Dependencies
+        run: |
+          cd depguard
+          npm install
+
+      - name: Run Full Tree Scan
+        id: scan
+        run: |
+          SCAN_OUTPUT=$(echo 'n' | node depguard/scan.js .)
+          echo "scan_results<<EOF" >> $GITHUB_ENV
+          echo "$SCAN_OUTPUT" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+          echo "$SCAN_OUTPUT"
+
+      - name: Post Tree Scan Comment
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          gh pr comment $PR_NUMBER --body "### 🌲 DepGuard Tree Scan Results
+          \`\`\`text
+          ${{ env.scan_results }}
+          \`\`\`"
+
+      - name: Evaluate Transitive Risks
+        run: |
+          if echo "${{ env.scan_results }}" | grep "\[Transitive\]" | grep -E "\(([0-9]|1[0-9]|2[0-4])\/100\)"; then
+            echo "Tree scan failed. Critical risk transitive dependency detected."
             exit 1
           fi
