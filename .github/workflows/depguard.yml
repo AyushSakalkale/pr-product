@@ -1,0 +1,92 @@
+name: DepGuard Security Check
+
+on:
+  pull_request:
+    paths:
+      - 'package.json'
+      - 'requirements.txt'
+      - 'Gemfile'
+      - 'go.mod'
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install DepGuard
+        run: |
+          cd depguard
+          npm install
+          # Link the tool locally so it can be called via 'node index.js'
+          echo "DEP_GUARD_PATH=$(pwd)/index.js" >> $GITHUB_ENV
+
+      - name: Detect Changed Packages
+        id: detect
+        run: |
+          # Fetch main to compare
+          git fetch origin main:main
+          
+          CHANGED_PACKAGES=""
+          
+          # 1. Check package.json (NPM)
+          if git diff main...HEAD package.json | grep -q '^+'; then
+            NPM_CHANGES=$(git diff main...HEAD package.json | grep '^+ ' | grep '"' | cut -d'"' -f2 | sort -u | xargs)
+            CHANGED_PACKAGES="$CHANGED_PACKAGES $NPM_CHANGES"
+          fi
+          
+          # 2. Check requirements.txt (Python) - Note: DepGuard currently defaults to NPM ecosystem in OSV
+          if git diff main...HEAD requirements.txt | grep -q '^+'; then
+            PY_CHANGES=$(git diff main...HEAD requirements.txt | grep '^+[a-zA-Z]' | sed 's/+//' | cut -d'=' -f1 | cut -d'>' -f1 | xargs)
+            CHANGED_PACKAGES="$CHANGED_PACKAGES $PY_CHANGES"
+          fi
+
+          # Clean up and export
+          PACKAGES=$(echo "$CHANGED_PACKAGES" | xargs)
+          echo "packages=$PACKAGES" >> $GITHUB_OUTPUT
+          echo "Detected packages: $PACKAGES"
+
+      - name: Run DepGuard and Comment
+        if: steps.detect.outputs.packages != ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          COMMENT_BODY="### 🛡️ DepGuard Dependency Analysis\n\n"
+          FAILED=false
+          
+          for pkg in ${{ steps.detect.outputs.packages }}; do
+            echo "Analyzing $pkg..."
+            # Run depguard and capture output
+            OUTPUT=$(node $DEP_GUARD_PATH $pkg)
+            
+            # Extract score and summary
+            SCORE=$(echo "$OUTPUT" | grep "Final Score:" | awk '{print $3}')
+            SUMMARY=$(echo "$OUTPUT" | sed -n '/----------------------------/,$p' | tail -n +3)
+            
+            COMMENT_BODY="$COMMENT_BODY**Package:** \`$pkg\`  \n"
+            COMMENT_BODY="$COMMENT_BODY**Score:** $SCORE / 100  \n"
+            COMMENT_BODY="$COMMENT_BODY$SUMMARY\n\n---\n"
+            
+            if [ "$SCORE" -lt 50 ]; then
+              FAILED=true
+            fi
+          done
+          
+          # Post the comment to the PR
+          gh pr comment $PR_NUMBER --body "$(echo -e "$COMMENT_BODY")"
+          
+          if [ "$FAILED" = true ]; then
+            echo "One or more packages scored below 50. Failing the check."
+            exit 1
+          fi
