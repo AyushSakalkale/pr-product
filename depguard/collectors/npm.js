@@ -60,7 +60,8 @@ async function getNpmData(packageName) {
             dependentCount,
             lastPublishedDate,
             totalVersions,
-            license
+            license,
+            repository: data.repository
         };
 
     } catch (error) {

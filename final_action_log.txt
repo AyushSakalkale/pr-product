@@ -1,0 +1,248 @@
+﻿2026-05-01T15:10:44.8933816Z Current runner version: '2.334.0'
+2026-05-01T15:10:44.8961581Z ##[group]Runner Image Provisioner
+2026-05-01T15:10:44.8962493Z Hosted Compute Agent
+2026-05-01T15:10:44.8962990Z Version: 20260213.493
+2026-05-01T15:10:44.8963531Z Commit: 5c115507f6dd24b8de37d8bbe0bb4509d0cc0fa3
+2026-05-01T15:10:44.8964214Z Build Date: 2026-02-13T00:28:41Z
+2026-05-01T15:10:44.8964821Z Worker ID: {61305c41-5bc0-4d1e-a32a-0fc16eb31d92}
+2026-05-01T15:10:44.8965461Z Azure Region: centralus
+2026-05-01T15:10:44.8966010Z ##[endgroup]
+2026-05-01T15:10:44.8967395Z ##[group]Operating System
+2026-05-01T15:10:44.8967902Z Ubuntu
+2026-05-01T15:10:44.8968423Z 24.04.4
+2026-05-01T15:10:44.8968817Z LTS
+2026-05-01T15:10:44.8969227Z ##[endgroup]
+2026-05-01T15:10:44.8969691Z ##[group]Runner Image
+2026-05-01T15:10:44.8970173Z Image: ubuntu-24.04
+2026-05-01T15:10:44.8970600Z Version: 20260413.86.1
+2026-05-01T15:10:44.8971939Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260413.86/images/ubuntu/Ubuntu2404-Readme.md
+2026-05-01T15:10:44.8973235Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260413.86
+2026-05-01T15:10:44.8974103Z ##[endgroup]
+2026-05-01T15:10:44.8975050Z ##[group]GITHUB_TOKEN Permissions
+2026-05-01T15:10:44.8977218Z Metadata: read
+2026-05-01T15:10:44.8977688Z PullRequests: write
+2026-05-01T15:10:44.8978169Z ##[endgroup]
+2026-05-01T15:10:44.8980415Z Secret source: Actions
+2026-05-01T15:10:44.8981707Z Prepare workflow directory
+2026-05-01T15:10:44.9305771Z Prepare all required actions
+2026-05-01T15:10:44.9344849Z Getting action download info
+2026-05-01T15:10:45.3360636Z Download action repository 'actions/checkout@v4' (SHA:34e114876b0b11c390a56381ad16ebd13914f8d5)
+2026-05-01T15:10:45.4228748Z Download action repository 'actions/setup-node@v4' (SHA:49933ea5288caeca8642d1e84afbd3f7d6820020)
+2026-05-01T15:10:45.5872235Z Complete job name: analyze
+2026-05-01T15:10:45.6554804Z ##[group]Run actions/checkout@v4
+2026-05-01T15:10:45.6555787Z with:
+2026-05-01T15:10:45.6556305Z   fetch-depth: 0
+2026-05-01T15:10:45.6556913Z   repository: AyushSakalkale/pr-product
+2026-05-01T15:10:45.6557853Z   token: ***
+2026-05-01T15:10:45.6558353Z   ssh-strict: true
+2026-05-01T15:10:45.6558884Z   ssh-user: git
+2026-05-01T15:10:45.6559460Z   persist-credentials: true
+2026-05-01T15:10:45.6560001Z   clean: true
+2026-05-01T15:10:45.6560520Z   sparse-checkout-cone-mode: true
+2026-05-01T15:10:45.6561355Z   fetch-tags: false
+2026-05-01T15:10:45.6561922Z   show-progress: true
+2026-05-01T15:10:45.6562429Z   lfs: false
+2026-05-01T15:10:45.6562944Z   submodules: false
+2026-05-01T15:10:45.6563436Z   set-safe-directory: true
+2026-05-01T15:10:45.6564320Z ##[endgroup]
+2026-05-01T15:10:45.7762242Z Syncing repository: AyushSakalkale/pr-product
+2026-05-01T15:10:45.7764443Z ##[group]Getting Git version info
+2026-05-01T15:10:45.7765379Z Working directory is '/home/runner/work/pr-product/pr-product'
+2026-05-01T15:10:45.7766534Z [command]/usr/bin/git version
+2026-05-01T15:10:45.7767042Z git version 2.53.0
+2026-05-01T15:10:45.7768666Z ##[endgroup]
+2026-05-01T15:10:45.7773576Z Temporarily overriding HOME='/home/runner/work/_temp/9a626753-6d5f-4248-8b6e-ec01f43f3696' before making global git config changes
+2026-05-01T15:10:45.7774939Z Adding repository directory to the temporary git global config as a safe directory
+2026-05-01T15:10:45.7776067Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/pr-product/pr-product
+2026-05-01T15:10:45.7777766Z Deleting the contents of '/home/runner/work/pr-product/pr-product'
+2026-05-01T15:10:45.7778849Z ##[group]Initializing the repository
+2026-05-01T15:10:45.7779632Z [command]/usr/bin/git init /home/runner/work/pr-product/pr-product
+2026-05-01T15:10:45.7839700Z hint: Using 'master' as the name for the initial branch. This default branch name
+2026-05-01T15:10:45.7840768Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+2026-05-01T15:10:45.7841831Z hint: to use in all of your new repositories, which will suppress this warning,
+2026-05-01T15:10:45.7843239Z hint: call:
+2026-05-01T15:10:45.7843651Z hint:
+2026-05-01T15:10:45.7844291Z hint: 	git config --global init.defaultBranch <name>
+2026-05-01T15:10:45.7845143Z hint:
+2026-05-01T15:10:45.7845722Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+2026-05-01T15:10:45.7846655Z hint: 'development'. The just-created branch can be renamed via this command:
+2026-05-01T15:10:45.7847387Z hint:
+2026-05-01T15:10:45.7847800Z hint: 	git branch -m <name>
+2026-05-01T15:10:45.7848277Z hint:
+2026-05-01T15:10:45.7849041Z hint: Disable this message with "git config set advice.defaultBranchName false"
+2026-05-01T15:10:45.7850416Z Initialized empty Git repository in /home/runner/work/pr-product/pr-product/.git/
+2026-05-01T15:10:45.7852480Z [command]/usr/bin/git remote add origin https://github.com/AyushSakalkale/pr-product
+2026-05-01T15:10:45.7875745Z ##[endgroup]
+2026-05-01T15:10:45.7876593Z ##[group]Disabling automatic garbage collection
+2026-05-01T15:10:45.7879578Z [command]/usr/bin/git config --local gc.auto 0
+2026-05-01T15:10:45.7904109Z ##[endgroup]
+2026-05-01T15:10:45.7905575Z ##[group]Setting up auth
+2026-05-01T15:10:45.7911675Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-05-01T15:10:45.7936438Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-05-01T15:10:45.8160616Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-05-01T15:10:45.8184541Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-05-01T15:10:45.8349607Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-05-01T15:10:45.8375237Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-05-01T15:10:45.8538995Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+2026-05-01T15:10:45.8566178Z ##[endgroup]
+2026-05-01T15:10:45.8567718Z ##[group]Fetching the repository
+2026-05-01T15:10:45.8576508Z [command]/usr/bin/git -c protocol.version=2 fetch --prune --no-recurse-submodules origin +refs/heads/*:refs/remotes/origin/* +refs/tags/*:refs/tags/* +85572e7ed51e45718d0933d1ce89756e298ac6ca:refs/remotes/pull/1/merge
+2026-05-01T15:10:46.4949500Z From https://github.com/AyushSakalkale/pr-product
+2026-05-01T15:10:46.4952622Z  * [new branch]      main                                     -> origin/main
+2026-05-01T15:10:46.4954434Z  * [new branch]      test/depguard-action                     -> origin/test/depguard-action
+2026-05-01T15:10:46.4956398Z  * [new ref]         85572e7ed51e45718d0933d1ce89756e298ac6ca -> pull/1/merge
+2026-05-01T15:10:46.4973899Z ##[endgroup]
+2026-05-01T15:10:46.4975553Z ##[group]Determining the checkout info
+2026-05-01T15:10:46.4977081Z ##[endgroup]
+2026-05-01T15:10:46.4980217Z [command]/usr/bin/git sparse-checkout disable
+2026-05-01T15:10:46.5010770Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+2026-05-01T15:10:46.5032032Z ##[group]Checking out the ref
+2026-05-01T15:10:46.5034318Z [command]/usr/bin/git checkout --progress --force refs/remotes/pull/1/merge
+2026-05-01T15:10:46.5274656Z Note: switching to 'refs/remotes/pull/1/merge'.
+2026-05-01T15:10:46.5276273Z 
+2026-05-01T15:10:46.5277236Z You are in 'detached HEAD' state. You can look around, make experimental
+2026-05-01T15:10:46.5279048Z changes and commit them, and you can discard any commits you make in this
+2026-05-01T15:10:46.5281404Z state without impacting any branches by switching back to a branch.
+2026-05-01T15:10:46.5282498Z 
+2026-05-01T15:10:46.5283217Z If you want to create a new branch to retain commits you create, you may
+2026-05-01T15:10:46.5284911Z do so (now or later) by using -c with the switch command. Example:
+2026-05-01T15:10:46.5286254Z 
+2026-05-01T15:10:46.5286638Z   git switch -c <new-branch-name>
+2026-05-01T15:10:46.5287280Z 
+2026-05-01T15:10:46.5287664Z Or undo this operation with:
+2026-05-01T15:10:46.5288281Z 
+2026-05-01T15:10:46.5288584Z   git switch -
+2026-05-01T15:10:46.5289022Z 
+2026-05-01T15:10:46.5289842Z Turn off this advice by setting config variable advice.detachedHead to false
+2026-05-01T15:10:46.5291327Z 
+2026-05-01T15:10:46.5292814Z HEAD is now at 85572e7 Merge e164c3db21b48b5befc33f005f71da5cf1d39a05 into db251eb43c6e1177af6e5ba5424982471470afe3
+2026-05-01T15:10:46.5297360Z ##[endgroup]
+2026-05-01T15:10:46.5315131Z [command]/usr/bin/git log -1 --format=%H
+2026-05-01T15:10:46.5333141Z 85572e7ed51e45718d0933d1ce89756e298ac6ca
+2026-05-01T15:10:46.5645733Z ##[group]Run actions/setup-node@v4
+2026-05-01T15:10:46.5646806Z with:
+2026-05-01T15:10:46.5647574Z   node-version: 18
+2026-05-01T15:10:46.5648423Z   always-auth: false
+2026-05-01T15:10:46.5649289Z   check-latest: false
+2026-05-01T15:10:46.5650447Z   token: ***
+2026-05-01T15:10:46.5651289Z ##[endgroup]
+2026-05-01T15:10:46.7390112Z Attempting to download 18...
+2026-05-01T15:10:47.4521361Z Acquiring 18.20.8 - x64 from https://github.com/actions/node-versions/releases/download/18.20.8-14110393767/node-18.20.8-linux-x64.tar.gz
+2026-05-01T15:10:48.0598822Z Extracting ...
+2026-05-01T15:10:48.0683688Z [command]/usr/bin/tar xz --strip 1 --warning=no-unknown-keyword --overwrite -C /home/runner/work/_temp/1bf810d6-8e9e-497a-a265-0337e5829253 -f /home/runner/work/_temp/7e244548-e7a0-4744-b986-deb0d85e44dd
+2026-05-01T15:10:48.9694402Z Adding to the cache ...
+2026-05-01T15:10:50.1442426Z ##[group]Environment details
+2026-05-01T15:10:50.3675936Z node: v18.20.8
+2026-05-01T15:10:50.3676466Z npm: 10.8.2
+2026-05-01T15:10:50.3676661Z yarn: 1.22.22
+2026-05-01T15:10:50.3677407Z ##[endgroup]
+2026-05-01T15:10:50.3808292Z ##[group]Run cd depguard
+2026-05-01T15:10:50.3808655Z [36;1mcd depguard[0m
+2026-05-01T15:10:50.3808887Z [36;1mnpm install[0m
+2026-05-01T15:10:50.3809266Z [36;1m# Link the tool locally so it can be called via 'node index.js'[0m
+2026-05-01T15:10:50.3809752Z [36;1mecho "DEP_GUARD_PATH=$(pwd)/index.js" >> $GITHUB_ENV[0m
+2026-05-01T15:10:50.3831019Z shell: /usr/bin/bash -e {0}
+2026-05-01T15:10:50.3831600Z ##[endgroup]
+2026-05-01T15:10:50.9607336Z 
+2026-05-01T15:10:50.9613033Z up to date, audited 25 packages in 511ms
+2026-05-01T15:10:50.9613472Z 
+2026-05-01T15:10:50.9613726Z 7 packages are looking for funding
+2026-05-01T15:10:50.9614018Z   run `npm fund` for details
+2026-05-01T15:10:50.9617927Z 
+2026-05-01T15:10:50.9618234Z found 0 vulnerabilities
+2026-05-01T15:10:50.9701994Z ##[group]Run # Fetch main to compare
+2026-05-01T15:10:50.9702350Z [36;1m# Fetch main to compare[0m
+2026-05-01T15:10:50.9702604Z [36;1mgit fetch origin main:main[0m
+2026-05-01T15:10:50.9702840Z [36;1m[0m
+2026-05-01T15:10:50.9703028Z [36;1mCHANGED_PACKAGES=""[0m
+2026-05-01T15:10:50.9703241Z [36;1m[0m
+2026-05-01T15:10:50.9703439Z [36;1m# 1. Check package.json (NPM)[0m
+2026-05-01T15:10:50.9703814Z [36;1mif git diff main...HEAD package.json | grep -q '^+'; then[0m
+2026-05-01T15:10:50.9704356Z [36;1m  NPM_CHANGES=$(git diff main...HEAD package.json | grep '^+ ' | grep '"' | cut -d'"' -f2 | sort -u | xargs)[0m
+2026-05-01T15:10:50.9704862Z [36;1m  CHANGED_PACKAGES="$CHANGED_PACKAGES $NPM_CHANGES"[0m
+2026-05-01T15:10:50.9705154Z [36;1mfi[0m
+2026-05-01T15:10:50.9705375Z [36;1m[0m
+2026-05-01T15:10:50.9705733Z [36;1m# 2. Check requirements.txt (Python) - Note: DepGuard currently defaults to NPM ecosystem in OSV[0m
+2026-05-01T15:10:50.9706291Z [36;1mif git diff main...HEAD requirements.txt | grep -q '^+'; then[0m
+2026-05-01T15:10:50.9706852Z [36;1m  PY_CHANGES=$(git diff main...HEAD requirements.txt | grep '^+[a-zA-Z]' | sed 's/+//' | cut -d'=' -f1 | cut -d'>' -f1 | xargs)[0m
+2026-05-01T15:10:50.9707396Z [36;1m  CHANGED_PACKAGES="$CHANGED_PACKAGES $PY_CHANGES"[0m
+2026-05-01T15:10:50.9707675Z [36;1mfi[0m
+2026-05-01T15:10:50.9707854Z [36;1m[0m
+2026-05-01T15:10:50.9708194Z [36;1m# Clean up and export[0m
+2026-05-01T15:10:50.9708472Z [36;1mPACKAGES=$(echo "$CHANGED_PACKAGES" | xargs)[0m
+2026-05-01T15:10:50.9708801Z [36;1mecho "packages=$PACKAGES" >> $GITHUB_OUTPUT[0m
+2026-05-01T15:10:50.9709101Z [36;1mecho "Detected packages: $PACKAGES"[0m
+2026-05-01T15:10:50.9723756Z shell: /usr/bin/bash -e {0}
+2026-05-01T15:10:50.9724022Z env:
+2026-05-01T15:10:50.9724330Z   DEP_GUARD_PATH: /home/runner/work/pr-product/pr-product/depguard/index.js
+2026-05-01T15:10:50.9724704Z ##[endgroup]
+2026-05-01T15:10:51.2555766Z From https://github.com/AyushSakalkale/pr-product
+2026-05-01T15:10:51.2556489Z  * [new branch]      main       -> main
+2026-05-01T15:10:51.2690174Z fatal: ambiguous argument 'requirements.txt': unknown revision or path not in the working tree.
+2026-05-01T15:10:51.2690904Z Use '--' to separate paths from revisions, like this:
+2026-05-01T15:10:51.2692683Z 'git <command> [<revision>...] -- [<file>...]'
+2026-05-01T15:10:51.2714995Z Detected packages: colors event-stream lodash
+2026-05-01T15:10:51.2792985Z ##[group]Run COMMENT_BODY="### 🛡️ DepGuard Dependency Analysis\n\n"
+2026-05-01T15:10:51.2793444Z [36;1mCOMMENT_BODY="### 🛡️ DepGuard Dependency Analysis\n\n"[0m
+2026-05-01T15:10:51.2793766Z [36;1mFAILED=false[0m
+2026-05-01T15:10:51.2793956Z [36;1m[0m
+2026-05-01T15:10:51.2794183Z [36;1mfor pkg in colors event-stream lodash; do[0m
+2026-05-01T15:10:51.2794632Z [36;1m  echo "Analyzing $pkg..."[0m
+2026-05-01T15:10:51.2795028Z [36;1m  # Run depguard and capture output[0m
+2026-05-01T15:10:51.2795331Z [36;1m  OUTPUT=$(node $DEP_GUARD_PATH $pkg)[0m
+2026-05-01T15:10:51.2795686Z [36;1m  [0m
+2026-05-01T15:10:51.2795961Z [36;1m  # Extract scores and summary[0m
+2026-05-01T15:10:51.2796279Z [36;1m  SCORE=$(echo "$OUTPUT" | grep "Final Score:" | awk '{print $3}')[0m
+2026-05-01T15:10:51.2796718Z [36;1m  MAINTENANCE=$(echo "$OUTPUT" | grep "Maintenance Score:" | awk '{print $3}')[0m
+2026-05-01T15:10:51.2797247Z [36;1m  SUMMARY=$(echo "$OUTPUT" | sed -n '/----------------------------/,$p' | tail -n +3)[0m
+2026-05-01T15:10:51.2797617Z [36;1m  [0m
+2026-05-01T15:10:51.2797859Z [36;1m  COMMENT_BODY="$COMMENT_BODY**Package:** \`$pkg\`  \n"[0m
+2026-05-01T15:10:51.2798302Z [36;1m  COMMENT_BODY="$COMMENT_BODY**Score:** $SCORE / 100 | **Maintenance:** $MAINTENANCE / 100 \n"[0m
+2026-05-01T15:10:51.2798921Z [36;1m  COMMENT_BODY="$COMMENT_BODY<details><summary>Detailed Analysis</summary>\n\n$SUMMARY\n\n</details>\n\n---\n"[0m
+2026-05-01T15:10:51.2799364Z [36;1m  [0m
+2026-05-01T15:10:51.2799555Z [36;1m  if [ "$SCORE" -lt 50 ]; then[0m
+2026-05-01T15:10:51.2799790Z [36;1m    FAILED=true[0m
+2026-05-01T15:10:51.2799996Z [36;1m  fi[0m
+2026-05-01T15:10:51.2800173Z [36;1mdone[0m
+2026-05-01T15:10:51.2800340Z [36;1m[0m
+2026-05-01T15:10:51.2800535Z [36;1m# Post the comment to the PR[0m
+2026-05-01T15:10:51.2800853Z [36;1mgh pr comment $PR_NUMBER --body "$(echo -e "$COMMENT_BODY")"[0m
+2026-05-01T15:10:51.2801347Z [36;1m[0m
+2026-05-01T15:10:51.2801540Z [36;1mif [ "$FAILED" = true ]; then[0m
+2026-05-01T15:10:51.2801869Z [36;1m  echo "One or more packages scored below 50. Failing the check."[0m
+2026-05-01T15:10:51.2802187Z [36;1m  exit 1[0m
+2026-05-01T15:10:51.2802375Z [36;1mfi[0m
+2026-05-01T15:10:51.2816712Z shell: /usr/bin/bash -e {0}
+2026-05-01T15:10:51.2816962Z env:
+2026-05-01T15:10:51.2817267Z   DEP_GUARD_PATH: /home/runner/work/pr-product/pr-product/depguard/index.js
+2026-05-01T15:10:51.2818057Z   GITHUB_TOKEN: ***
+2026-05-01T15:10:51.2818258Z   PR_NUMBER: 1
+2026-05-01T15:10:51.2818454Z ##[endgroup]
+2026-05-01T15:10:51.2850027Z Analyzing colors...
+2026-05-01T15:10:51.7372754Z Error fetching data for Marak/colors: Request failed with status code 404
+2026-05-01T15:10:51.7393144Z Response Data: {
+2026-05-01T15:10:51.7393533Z   message: 'Not Found',
+2026-05-01T15:10:51.7394261Z   documentation_url: 'https://docs.github.com/rest/repos/repos#get-a-repository',
+2026-05-01T15:10:51.7394957Z   status: '404'
+2026-05-01T15:10:51.7395289Z }
+2026-05-01T15:10:52.6622827Z Analyzing event-stream...
+2026-05-01T15:10:54.8232559Z Analyzing lodash...
+2026-05-01T15:10:58.3047232Z https://github.com/AyushSakalkale/pr-product/pull/1#issuecomment-4359966946
+2026-05-01T15:10:58.3059571Z One or more packages scored below 50. Failing the check.
+2026-05-01T15:10:58.3072977Z ##[error]Process completed with exit code 1.
+2026-05-01T15:10:58.3180327Z Post job cleanup.
+2026-05-01T15:10:58.4119202Z [command]/usr/bin/git version
+2026-05-01T15:10:58.4153646Z git version 2.53.0
+2026-05-01T15:10:58.4200088Z Temporarily overriding HOME='/home/runner/work/_temp/dfd582d6-053d-4d79-89ae-3960894ca905' before making global git config changes
+2026-05-01T15:10:58.4201713Z Adding repository directory to the temporary git global config as a safe directory
+2026-05-01T15:10:58.4206244Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/pr-product/pr-product
+2026-05-01T15:10:58.4237382Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+2026-05-01T15:10:58.4264080Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+2026-05-01T15:10:58.4437294Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+2026-05-01T15:10:58.4453922Z http.https://github.com/.extraheader
+2026-05-01T15:10:58.4464183Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+2026-05-01T15:10:58.4488032Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+2026-05-01T15:10:58.4650112Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+2026-05-01T15:10:58.4674869Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+2026-05-01T15:10:58.4945603Z Cleaning up orphan processes
+2026-05-01T15:10:58.5159905Z ##[warning]Node.js 20 actions are deprecated. The following actions are running on Node.js 20 and may not work as expected: actions/checkout@v4, actions/setup-node@v4. Actions will be forced to run with Node.js 24 by default starting June 2nd, 2026. Node.js 20 will be removed from the runner on September 16th, 2026. Please check if updated versions of these actions are available that support Node.js 24. To opt into Node.js 24 now, set the FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true environment variable on the runner or in your workflow file. Once Node.js 24 becomes the default, you can temporarily opt out by setting ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
