@@ -1,3 +1,5 @@
+const fs = require('fs');
+const path = require('path');
 const { getGithubData } = require('../collectors/github');
 const { getNpmData } = require('../collectors/npm');
 const { getSecurityData } = require('../collectors/security');
@@ -17,19 +19,37 @@ function extractGithubInfo(repository) {
 
 /**
  * Scores an array of packages with concurrency limiting.
- * 
- * @param {Array} packages - Flat array of package objects from getDependencyTree.
- * @param {number} concurrency - Max simultaneous API requests.
- * @returns {Promise<Array>} - Array of scored package objects.
  */
 async function scoreTree(packages, concurrency = 5) {
+    // Read ignored packages from .depguardignore
+    let ignoredPackages = [];
+    try {
+        const ignorePath = path.join(__dirname, '../.depguardignore');
+        if (fs.existsSync(ignorePath)) {
+            ignoredPackages = fs.readFileSync(ignorePath, 'utf8')
+                .split('\n')
+                .map(line => line.trim())
+                .filter(line => line.length > 0);
+        }
+    } catch (err) {
+        // Silently continue if file can't be read
+    }
+
+    const initialCount = packages.length;
+    const filteredPackages = packages.filter(pkg => !ignoredPackages.includes(pkg.name));
+    const skipCount = initialCount - filteredPackages.length;
+
+    if (skipCount > 0) {
+        console.log(`Skipping ${skipCount} packages listed in .depguardignore`);
+    }
+
     // Dynamic import for p-limit to support ESM in CJS
     const pLimit = (await import('p-limit')).default;
     const limit = pLimit(concurrency);
-    const total = packages.length;
+    const total = filteredPackages.length;
     let completed = 0;
 
-    const tasks = packages.map(pkg => {
+    const tasks = filteredPackages.map(pkg => {
         return limit(async () => {
             try {
                 const npmData = await getNpmData(pkg.name);
