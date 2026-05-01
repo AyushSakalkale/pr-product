@@ -59,6 +59,7 @@ jobs:
         if: steps.detect.outputs.packages != ''
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HUB_PAT: ${{ secrets.HUB_PAT }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           COMMENT_BODY="### 🛡️ DepGuard Dependency Analysis\n\n"
@@ -90,7 +91,7 @@ jobs:
       pull-requests: write
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+      HUB_PAT: ${{ secrets.HUB_PAT }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4

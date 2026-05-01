@@ -9,15 +9,14 @@ const axios = require('axios');
  */
 async function getGithubData(owner, repo) {
     try {
+        const token = process.env.GITHUB_PAT || process.env.HUB_PAT || process.env.GITHUB_TOKEN;
+
         const config = {
             headers: {
-                'User-Agent': 'depguard-app'
+                'User-Agent': 'depguard-app',
+                'Authorization': token ? `token ${token}` : undefined
             }
         };
-
-        if (process.env.GITHUB_TOKEN) {
-            config.headers['Authorization'] = `token ${process.env.GITHUB_TOKEN}`;
-        }
 
         // 1. Fetch Repository Base Info
         const repoUrl = `https://api.github.com/repos/${owner}/${repo}`;
