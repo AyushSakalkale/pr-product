@@ -39,6 +39,18 @@ async function getDependencyTree(projectPath, maxDepth = 3) {
             } catch (e) { /* skip */ }
         }
 
+        // Load package-lock.json if available
+        let packageLock = null;
+        try {
+            const lockPath = path.join(projectPath, 'package-lock.json');
+            if (fs.existsSync(lockPath)) {
+                packageLock = JSON.parse(fs.readFileSync(lockPath, 'utf8'));
+            }
+        } catch (e) { /* skip */ }
+
+        const sortedDirectDeps = Array.from(directDeps).sort();
+        const defaultParent = sortedDirectDeps[0] ? `${sortedDirectDeps[0]} (inherited)` : null;
+
         /**
          * Recursive walker
          */
@@ -88,6 +100,26 @@ async function getDependencyTree(projectPath, maxDepth = 3) {
                                 let resolvedParent = parentName;
                                 if (depth === 1 && !resolvedParent) {
                                     resolvedParent = transitiveParentMap.get(name) || null;
+                                    
+                                    // Fallback 1: Search package-lock.json
+                                    if (!resolvedParent && packageLock) {
+                                        const lockPackages = packageLock.packages || {};
+                                        for (const directDep of directDeps) {
+                                            const lockEntry = lockPackages[`node_modules/${directDep}`] || lockPackages[directDep];
+                                            if (lockEntry) {
+                                                const subDeps = { ...(lockEntry.dependencies || {}), ...(lockEntry.devDependencies || {}) };
+                                                if (subDeps[name]) {
+                                                    resolvedParent = directDep;
+                                                    break;
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    // Fallback 2: First direct dependency (inherited)
+                                    if (!resolvedParent) {
+                                        resolvedParent = defaultParent;
+                                    }
                                 }
 
                                 const existing = uniquePackages.get(name);
