@@ -1,2 +1,4 @@
 depguard/.env
 depguard/.env
+node_modules/
+depguard/node_modules/
