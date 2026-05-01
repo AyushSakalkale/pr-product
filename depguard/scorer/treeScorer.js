@@ -9,11 +9,33 @@ const { calculateScore } = require('./score');
  * Extracts GitHub owner and repo from NPM repository metadata.
  */
 function extractGithubInfo(repository) {
-    if (!repository || typeof repository.url !== 'string') return null;
-    const match = repository.url.match(/github\.com\/([^/]+)\/([^/.]+)/);
-    if (match) {
-        return { owner: match[1], repo: match[2].replace(/\.git$/, '') };
+    if (!repository) return null;
+    
+    // Handle shorthand string "owner/repo"
+    if (typeof repository === 'string') {
+        const parts = repository.split('/');
+        if (parts.length === 2) {
+            return { owner: parts[0], repo: parts[1] };
+        }
+        return null;
     }
+
+    if (typeof repository.url !== 'string') return null;
+    
+    // Handle various GitHub URL formats
+    // git+https://github.com/owner/repo.git
+    // https://github.com/owner/repo
+    // git://github.com/owner/repo
+    const githubRegex = /github\.com\/([^/]+)\/([^/.]+)/;
+    const match = repository.url.match(githubRegex);
+    
+    if (match) {
+        return { 
+            owner: match[1], 
+            repo: match[2].replace(/\.git$/, '').replace(/^git\+/, '') 
+        };
+    }
+    
     return null;
 }
 
