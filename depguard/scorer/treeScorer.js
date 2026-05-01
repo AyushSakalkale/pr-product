@@ -20,7 +20,7 @@ function extractGithubInfo(repository) {
 /**
  * Scores an array of packages with concurrency limiting.
  */
-async function scoreTree(packages, concurrency = 5) {
+async function scoreTree(packages, concurrency = 2) {
     // Read ignored packages from .depguardignore
     let ignoredPackages = [];
     try {

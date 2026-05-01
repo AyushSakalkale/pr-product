@@ -1,4 +1,5 @@
 const axios = require('axios');
+const { trackRequest } = require('../utils/rateLimiter');
 
 /**
  * Fetches repository data from GitHub Public REST API.
@@ -9,6 +10,7 @@ const axios = require('axios');
  */
 async function getGithubData(owner, repo) {
     try {
+        await trackRequest();
         const token = process.env.GITHUB_PAT || process.env.HUB_PAT || process.env.GITHUB_TOKEN;
 
         const config = {
@@ -36,11 +38,10 @@ async function getGithubData(owner, repo) {
         const contributorsRes = await axios.get(contributorsUrl, config);
         const totalContributors = getCountFromLinkHeader(contributorsRes.headers.link) || (contributorsRes.data.length > 0 ? 1 : 0);
 
-        // 4. Use open_issues_count directly from repo endpoint — avoids Search API rate limits (30/min)
-        // open_issues_count includes PRs, so we use it as a proxy for open issues.
-        // For closed issues, use subscribers_count as a rough proxy, or fall back to 1.
-        const openIssuesCount = open_issues_count || 0;
-        const closedIssuesCount = repoRes.data.subscribers_count || 1;
+        // 4. Use open_issues_count from repo endpoint (free)
+        const openIssuesCount = open_issues_count;
+        const closedIssuesCount = 0; // Removing separate Search API call
+
 
         // Calculations
         const now = new Date();
@@ -48,8 +49,8 @@ async function getGithubData(owner, repo) {
         const diffTime = Math.abs(now - lastCommit);
         const daysSinceLastCommit = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-        const openToClosedRatio = closedIssuesCount > 0
-            ? parseFloat((openIssuesCount / closedIssuesCount).toFixed(2))
+        const openToClosedRatio = closedIssuesCount > 0 
+            ? parseFloat((openIssuesCount / closedIssuesCount).toFixed(2)) 
             : 0;
 
         return {
